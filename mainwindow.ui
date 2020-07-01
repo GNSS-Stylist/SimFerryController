@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SimFerryController</string>
+   <string>SimFerryController V1.0.0</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPlainTextEdit" name="plainTextEdit">
@@ -382,7 +382,7 @@
           <double>1000.000000000000000</double>
          </property>
          <property name="value">
-          <double>-100.000000000000000</double>
+          <double>-50.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -405,7 +405,7 @@
           <double>1000.000000000000000</double>
          </property>
          <property name="value">
-          <double>100.000000000000000</double>
+          <double>50.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -512,7 +512,7 @@
           <double>1000.000000000000000</double>
          </property>
          <property name="value">
-          <double>15.000000000000000</double>
+          <double>1.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -532,7 +532,7 @@
           <double>1000.000000000000000</double>
          </property>
          <property name="value">
-          <double>15.000000000000000</double>
+          <double>5.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -549,7 +549,7 @@
           <number>2000000000</number>
          </property>
          <property name="value">
-          <number>240</number>
+          <number>80</number>
          </property>
         </widget>
        </item>
