@@ -131,11 +131,11 @@ void Autopilot::update(const Eigen::Transform<double, 3, Eigen::Affine> &transfo
         double propulsion_N = pid_Position_N.getOutput(originCoords_2D_NE(0));
 
         pid_Position_E.setSetpoint(targetCoords_2D_NE(1));
-        double proulsion_E = pid_Position_E.getOutput(originCoords_2D_NE(1));
+        double propulsion_E = pid_Position_E.getOutput(originCoords_2D_NE(1));
 
-        Eigen::Vector2d positionPropulsionVec_2D_NE(-propulsion_N, proulsion_E);
+        Eigen::Vector2d positionPropulsionVec_2D_NE(-propulsion_N, propulsion_E);
 
-        // As the position propulsion vector is in woorld coordinates
+        // As the position propulsion vector is in world coordinates
         // we need to rotate it according to ferry's heading
         Eigen::Rotation2D<double> rotation(heading);
         Eigen::Vector2d positionPropulsionVec_Ferry = rotation.toRotationMatrix() * positionPropulsionVec_2D_NE;
