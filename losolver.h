@@ -64,7 +64,7 @@ private:
 
     bool refPointsValid = false;
     Eigen::Vector3d refPoints[3];
-    Eigen::Vector3d refCenterPoint;
+    Eigen::Vector3d refCentroid;
 
     Eigen::Vector3d points[3];
 

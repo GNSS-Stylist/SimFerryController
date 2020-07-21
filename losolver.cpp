@@ -70,7 +70,7 @@ bool LOSolver::calculateReferenceBasis(void)
     refDistAC = vecAtoC.norm();
     refDistBC = vecBtoC.norm();
 
-    refCenterPoint = (refPoints[0] + refPoints[1] + refPoints[2]) / 3;
+    refCentroid = (refPoints[0] + refPoints[1] + refPoints[2]) / 3;
     Eigen::Vector3d refVecYDirection = vecAtoC.cross(vecAtoB);
 
     if ((refDistAB == 0) ||
@@ -145,7 +145,7 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
 
     // TODO: Add comparison of distances with the reference basis points
 
-    Eigen::Vector3d centerPoint = (points[0] + points[1] + points[2]) / 3;
+    Eigen::Vector3d centroid = (points[0] + points[1] + points[2]) / 3;
     Eigen::Vector3d vecYDirection = vecAtoC.cross(vecAtoB);
 
     if ((distAB == 0) ||
@@ -185,8 +185,8 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
     // Inverse can be calculated using transpose because the matrix here is orthogonal.
     Eigen::Matrix3d finalInverseTransform = finalTransform.transpose();   // "True meaning" here is .inverse() (see above)
 
-    // Origin can be now calculated using center points and the newly calculated matrix
-    Eigen::Vector3d origin = centerPoint - (finalTransform * refCenterPoint);
+    // Origin can be now calculated using centroids and the newly calculated matrix
+    Eigen::Vector3d origin = centroid - (finalTransform * refCentroid);
 
     transform.matrix() <<
                 finalInverseTransform(0,0), finalInverseTransform(0,1), finalInverseTransform(0,2), origin(0),
@@ -197,9 +197,9 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
     if (orientationTransform_Debug)
     {
         orientationTransform_Debug->matrix() <<
-                orientationUnitVecX(0), orientationUnitVecX(1), orientationUnitVecX(2), centerPoint(0),
-                orientationUnitVecY(0), orientationUnitVecY(1), orientationUnitVecY(2), centerPoint(1),
-                orientationUnitVecZ(0), orientationUnitVecZ(1), orientationUnitVecZ(2), centerPoint(2),
+                orientationUnitVecX(0), orientationUnitVecX(1), orientationUnitVecX(2), centroid(0),
+                orientationUnitVecY(0), orientationUnitVecY(1), orientationUnitVecY(2), centroid(1),
+                orientationUnitVecZ(0), orientationUnitVecZ(1), orientationUnitVecZ(2), centroid(2),
                 0, 0, 0, 1;
     }
 
