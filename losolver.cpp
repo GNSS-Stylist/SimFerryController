@@ -60,15 +60,18 @@ bool LOSolver::calculateReferenceBasis(void)
 {
     errorCode = ERROR_NONE;
 
-    Eigen::Vector3d refVecAB = refPoints[1] - refPoints[0];
-    Eigen::Vector3d refVecAC = refPoints[2] - refPoints[0];
-    Eigen::Vector3d refVecBC = refPoints[2] - refPoints[1];
+    Eigen::Vector3d vecAtoB = refPoints[1] - refPoints[0];
+    Eigen::Vector3d vecAtoC = refPoints[2] - refPoints[0];
+    Eigen::Vector3d vecBtoC = refPoints[2] - refPoints[1];
 
-    refDistAB = refVecAB.norm();
-    refDistAC = refVecAC.norm();
-    refDistBC = refVecBC.norm();
+    Eigen::Vector3d vecAtoBCMidpoint = (refPoints[1] + refPoints[2]) / 2 - refPoints[0];
 
-    Eigen::Vector3d refVecYDirection = refVecAC.cross(refVecAB);
+    refDistAB = vecAtoB.norm();
+    refDistAC = vecAtoC.norm();
+    refDistBC = vecBtoC.norm();
+
+    refCenterPoint = (refPoints[0] + refPoints[1] + refPoints[2]) / 3;
+    Eigen::Vector3d refVecYDirection = vecAtoC.cross(vecAtoB);
 
     if ((refDistAB == 0) ||
             (refDistAC == 0) ||
@@ -82,12 +85,12 @@ bool LOSolver::calculateReferenceBasis(void)
     }
 
     // Calculate reference basis vectors so that:
-    // X points from A to B,
+    // X points from A to the midpoint of vector BC,
     // Y is in right angle with the plane defined by points A, B and C,
     // Z is in right angle with both vectors AB and the new unit vector Y
     // (and therefore Z lies on the plane defined by points A, B and C)
 
-    Eigen::Vector3d refUnitVecX = refVecAB.normalized();
+    Eigen::Vector3d refUnitVecX = vecAtoBCMidpoint.normalized();
     Eigen::Vector3d refUnitVecY = refVecYDirection.normalized();
 
     // This results in right-handed system. Handedness only affects the debug
@@ -130,16 +133,20 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
         errorCode = ERROR_NONE;
     }
 
-    Eigen::Vector3d vecAB = points[1] - points[0];
-    Eigen::Vector3d vecAC = points[2] - points[0];
-    Eigen::Vector3d vecBC = points[2] - points[1];
-    Eigen::Vector3d vecYDirection = vecAC.cross(vecAB);
+    Eigen::Vector3d vecAtoB = points[1] - points[0];
+    Eigen::Vector3d vecAtoC = points[2] - points[0];
+    Eigen::Vector3d vecBtoC = points[2] - points[1];
 
-    double distAB = vecAB.norm();
-    double distAC = vecAC.norm();
-    double distBC = vecBC.norm();
+    Eigen::Vector3d vecAtoBCMidpoint = (points[1] + points[2]) / 2 - points[0];
+
+    double distAB = vecAtoB.norm();
+    double distAC = vecAtoC.norm();
+    double distBC = vecBtoC.norm();
 
     // TODO: Add comparison of distances with the reference basis points
+
+    Eigen::Vector3d centerPoint = (points[0] + points[1] + points[2]) / 3;
+    Eigen::Vector3d vecYDirection = vecAtoC.cross(vecAtoB);
 
     if ((distAB == 0) ||
             (distAC == 0) ||
@@ -152,12 +159,12 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
     }
 
     // Calculate reference basis vectors (identically with the reference basis) so that:
-    // X points from A to B,
+    // X points from A to the midpoint of vector BC,
     // Y is in right angle with the plane defined by points A, B and C,
     // Z is in right angle with both vectors AB and the new unit vector Y
     // (and therefore Z lies on the plane defined by points A, B and C)
 
-    Eigen::Vector3d orientationUnitVecX = vecAB.normalized();
+    Eigen::Vector3d orientationUnitVecX = vecAtoBCMidpoint.normalized();
     Eigen::Vector3d orientationUnitVecY = vecYDirection.normalized();
 
     // This results in right-handed system. Handedness only affects the debug
@@ -166,22 +173,20 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
     // Left-handed version:
     // Eigen::Vector3d orientationUnitVecZ = orientationUnitVecY.cross(orientationUnitVecX).normalized();
 
-    Eigen::Matrix3d orientationBasis;
+    Eigen::Matrix3d orientationBasisInverse;    // This is actually formed as transpose, but as this is orthogonal, there's no difference
 
-    orientationBasis <<
+    orientationBasisInverse <<
                         orientationUnitVecX(0), orientationUnitVecY(0), orientationUnitVecZ(0),
                         orientationUnitVecX(1), orientationUnitVecY(1), orientationUnitVecZ(1),
                         orientationUnitVecX(2), orientationUnitVecY(2), orientationUnitVecZ(2);
 
-    Eigen::Matrix3d finalTransform = orientationBasis * refBasis;
+    Eigen::Matrix3d finalTransform = orientationBasisInverse * refBasis;
 
-    // Inverse could be also calculated using transpose because the matrix
-    // here is orthogonal. Could make a tiny speed-up(?)
-    // Will not use it now as the "true meaning" here is inverse.
-    Eigen::Matrix3d finalInverseTransform = finalTransform.inverse();   // Could use .transpose() as well (see above)
+    // Inverse can be calculated using transpose because the matrix here is orthogonal.
+    Eigen::Matrix3d finalInverseTransform = finalTransform.transpose();   // "True meaning" here is .inverse() (see above)
 
-    // Origin can be now calculated using reference point A and the newly calculated matrix
-    Eigen::Vector3d origin = points[0] - (finalTransform * refPoints[0]);
+    // Origin can be now calculated using center points and the newly calculated matrix
+    Eigen::Vector3d origin = centerPoint - (finalTransform * refCenterPoint);
 
     transform.matrix() <<
                 finalInverseTransform(0,0), finalInverseTransform(0,1), finalInverseTransform(0,2), origin(0),
@@ -192,9 +197,9 @@ bool LOSolver::getTransformMatrix(Eigen::Transform<double, 3, Eigen::Affine>& tr
     if (orientationTransform_Debug)
     {
         orientationTransform_Debug->matrix() <<
-                orientationUnitVecX(0), orientationUnitVecX(1), orientationUnitVecX(2), points[0](0),
-                orientationUnitVecY(0), orientationUnitVecY(1), orientationUnitVecY(2), points[0](1),
-                orientationUnitVecZ(0), orientationUnitVecZ(1), orientationUnitVecZ(2), points[0](2),
+                orientationUnitVecX(0), orientationUnitVecX(1), orientationUnitVecX(2), centerPoint(0),
+                orientationUnitVecY(0), orientationUnitVecY(1), orientationUnitVecY(2), centerPoint(1),
+                orientationUnitVecZ(0), orientationUnitVecZ(1), orientationUnitVecZ(2), centerPoint(2),
                 0, 0, 0, 1;
     }
 

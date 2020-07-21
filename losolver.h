@@ -64,6 +64,8 @@ private:
 
     bool refPointsValid = false;
     Eigen::Vector3d refPoints[3];
+    Eigen::Vector3d refCenterPoint;
+
     Eigen::Vector3d points[3];
 
     // For speed-up when checking the validity of points:
