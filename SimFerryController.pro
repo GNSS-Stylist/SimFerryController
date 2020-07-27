@@ -11,6 +11,14 @@ CONFIG += c++11
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# Following two defines remove Eigen's vectorization that seems to cause
+# runtime assertion failure (not always, but sometimes, how?!?)
+# By default it tries to use fast (SIMD) instructions for calculation, see:
+# http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html
+# Here lack of vectorization may not be a big issue.
+DEFINES += EIGEN_DONT_VECTORIZE
+DEFINES += EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
+
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
