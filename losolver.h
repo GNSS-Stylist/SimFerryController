@@ -60,7 +60,7 @@ public:
 private:
     ErrorCode errorCode = ERROR_NONE;
 
-    Eigen::Matrix3d refBasis;
+    Eigen::Matrix3d refBasisInverse;
 
     bool refPointsValid = false;
     Eigen::Vector3d refPoints[3];

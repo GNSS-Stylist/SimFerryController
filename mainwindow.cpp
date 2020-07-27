@@ -261,30 +261,38 @@ void MainWindow::readyRead()
 
             heading = fmod((heading + 360), 360);
 
-            addLogLine("Destination N: " + QString::number(autopilotDestination.coord_N,'f',3) +
+            addLogLine("Destination\tN: " + QString::number(autopilotDestination.coord_N,'f',3) +
                        "\tE: " + QString::number(autopilotDestination.coord_E,'f',3) +
                        "\tHeading: " + QString::number(fmod(autopilotDestination.heading * 360. / (M_PI * 2) + 360, 360),'f',2));
+
+            addLogLine("Location\tN: " + QString::number(transform_NED(0,3),'f',3) +
+                       "\tE: " + QString::number(transform_NED(1,3),'f',3) +
+                       "\tD: " + QString::number(transform_NED(2,3),'f',2));
 
             addLogLine("Heading: " + QString::number(heading,'f',2) +
                        "\tPitch: " + QString::number(pitch,'f',2) +
                        "\tRoll: " + QString::number(roll,'f',2));
 
             QString outString =
+                    // Note: Linear (basis) part of the transformation matrix here is transposed.
+                    // Not fixing this now as it would break the compatibility with the simulator.
                     "1;" +   // "Command id": transform
-                    QString::number(transform_EUS(0,0),'f',3) + ";" + QString::number(transform_EUS(0,1),'f',3) + ";" + QString::number(transform_EUS(0,2),'f',3) + ";" + QString::number(transform_EUS(0,3),'f',3) + ";" +
-                    QString::number(transform_EUS(1,0),'f',3) + ";" + QString::number(transform_EUS(1,1),'f',3) + ";" + QString::number(transform_EUS(1,2),'f',3) + ";" + QString::number(transform_EUS(1,3),'f',3) + ";" +
-                    QString::number(transform_EUS(2,0),'f',3) + ";" + QString::number(transform_EUS(2,1),'f',3) + ";" + QString::number(transform_EUS(2,2),'f',3) + ";" + QString::number(transform_EUS(2,3),'f',3) + ";" +
-                    QString::number(transform_EUS(3,0),'f',3) + ";" + QString::number(transform_EUS(3,1),'f',3) + ";" + QString::number(transform_EUS(3,2),'f',3) + ";" + QString::number(transform_EUS(3,3),'f',3);
+                    QString::number(transform_EUS(0,0),'f',3) + ";" + QString::number(transform_EUS(1,0),'f',3) + ";" + QString::number(transform_EUS(2,0),'f',3) + ";" + QString::number(transform_EUS(0,3),'f',3) + ";" +
+                    QString::number(transform_EUS(0,1),'f',3) + ";" + QString::number(transform_EUS(1,1),'f',3) + ";" + QString::number(transform_EUS(2,1),'f',3) + ";" + QString::number(transform_EUS(1,3),'f',3) + ";" +
+                    QString::number(transform_EUS(0,2),'f',3) + ";" + QString::number(transform_EUS(1,2),'f',3) + ";" + QString::number(transform_EUS(2,2),'f',3) + ";" + QString::number(transform_EUS(2,3),'f',3) + ";" +
+                    QString::number(transform_EUS(0,3),'f',3) + ";" + QString::number(transform_EUS(1,3),'f',3) + ";" + QString::number(transform_EUS(2,3),'f',3) + ";" + QString::number(transform_EUS(3,3),'f',3);
 
             QByteArray dataToSend = outString.toLatin1();
             udpServerSocket->writeDatagram(dataToSend, QHostAddress(ui->lineEdit_Host->text()), sendPort);
 
             outString =
+                    // Note: Linear (basis) part of the transformation matrix here is transposed.
+                    // Not fixing this now as it would break the compatibility with the simulator.
                     "10;" +   // "Command id": debugdata
-                    QString::number(debugTransform(0,0),'f',3) + ";" + QString::number(debugTransform(0,1),'f',3) + ";" + QString::number(debugTransform(0,2),'f',3) + ";" + QString::number(debugTransform(0,3),'f',3) + ";" +
-                    QString::number(debugTransform(1,0),'f',3) + ";" + QString::number(debugTransform(1,1),'f',3) + ";" + QString::number(debugTransform(1,2),'f',3) + ";" + QString::number(debugTransform(1,3),'f',3) + ";" +
-                    QString::number(debugTransform(2,0),'f',3) + ";" + QString::number(debugTransform(2,1),'f',3) + ";" + QString::number(debugTransform(2,2),'f',3) + ";" + QString::number(debugTransform(2,3),'f',3) + ";" +
-                    QString::number(debugTransform(3,0),'f',3) + ";" + QString::number(debugTransform(3,1),'f',3) + ";" + QString::number(debugTransform(3,2),'f',3) + ";" + QString::number(debugTransform(3,3),'f',3);
+                    QString::number(debugTransform(0,0),'f',3) + ";" + QString::number(debugTransform(1,0),'f',3) + ";" + QString::number(debugTransform(2,0),'f',3) + ";" + QString::number(debugTransform(0,3),'f',3) + ";" +
+                    QString::number(debugTransform(0,1),'f',3) + ";" + QString::number(debugTransform(1,1),'f',3) + ";" + QString::number(debugTransform(2,1),'f',3) + ";" + QString::number(debugTransform(1,3),'f',3) + ";" +
+                    QString::number(debugTransform(0,2),'f',3) + ";" + QString::number(debugTransform(1,2),'f',3) + ";" + QString::number(debugTransform(2,2),'f',3) + ";" + QString::number(debugTransform(2,3),'f',3) + ";" +
+                    QString::number(debugTransform(0,3),'f',3) + ";" + QString::number(debugTransform(1,3),'f',3) + ";" + QString::number(debugTransform(2,3),'f',3) + ";" + QString::number(debugTransform(3,3),'f',3);
 
             dataToSend = outString.toLatin1();
             udpServerSocket->writeDatagram(dataToSend, QHostAddress(ui->lineEdit_Host->text()), sendPort);
