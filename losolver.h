@@ -58,7 +58,7 @@ public:
     static Eigen::Vector3d changeAxesConvention(const Eigen::Vector3d source, const AxesConvention from, const AxesConvention to);
 
 private:
-    ErrorCode errorCode = ERROR_NONE;
+    ErrorCode errorCode = ERROR_INVALID_REFERENCE_POINTS;
 
     Eigen::Matrix3d refBasisInverse;
 
